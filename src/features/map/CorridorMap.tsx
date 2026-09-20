@@ -33,6 +33,7 @@ interface CorridorMapProps {
   highlightedCascadeTarget?: string | null;
   interventionTarget?: string | null;
   showEmergencyHighlight?: boolean;
+  mapMode?: "OVERVIEW" | "LIVE_NETWORK" | "RISK_MAP";
 }
 
 export const CorridorMap: React.FC<CorridorMapProps> = ({
@@ -47,15 +48,37 @@ export const CorridorMap: React.FC<CorridorMapProps> = ({
   highlightedCascadeTarget,
   interventionTarget = "J7",
   showEmergencyHighlight = true,
+  mapMode = "OVERVIEW",
 }) => {
   // Layer visibility toggles
   const [layers, setLayers] = useState({
     queues: true,
-    risks: true,
-    cascadeVectors: true,
+    risks: mapMode === "RISK_MAP" || mapMode === "OVERVIEW",
+    cascadeVectors: mapMode === "RISK_MAP" || mapMode === "OVERVIEW",
     emergencyRoute: true,
-    sensorProvenance: false,
+    sensorProvenance: mapMode === "LIVE_NETWORK",
   });
+
+  // Sync layers when mapMode changes
+  React.useEffect(() => {
+    if (mapMode === "RISK_MAP") {
+      setLayers({
+        queues: true,
+        risks: true,
+        cascadeVectors: true,
+        emergencyRoute: true,
+        sensorProvenance: false,
+      });
+    } else if (mapMode === "LIVE_NETWORK") {
+      setLayers({
+        queues: true,
+        risks: false,
+        cascadeVectors: false,
+        emergencyRoute: true,
+        sensorProvenance: true,
+      });
+    }
+  }, [mapMode]);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -112,12 +135,29 @@ export const CorridorMap: React.FC<CorridorMapProps> = ({
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-mono font-bold tracking-wider text-slate-300 uppercase flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-            CORRIDOR TOPOLOGY MAP:
+            {mapMode === "RISK_MAP"
+              ? "RISK MAP MODE:"
+              : mapMode === "LIVE_NETWORK"
+              ? "LIVE NETWORK SENSORS:"
+              : "CORRIDOR TOPOLOGY MAP:"}
           </span>
           <span className="text-xs font-mono text-cyan-400 font-semibold">
-            AURA DEMO CORRIDOR (9 NODES / 14 LINKS)
+            {mapMode === "RISK_MAP"
+              ? "PROBABILISTIC SPILLBACK & CASCADE VECTORS"
+              : mapMode === "LIVE_NETWORK"
+              ? "PHYSICAL INDUCTION LOOPS & RADAR SPEEDS"
+              : "AURA DEMO CORRIDOR (9 NODES / 14 LINKS)"}
           </span>
-          <ProvenanceTag status="SIMULATED" size="xs" />
+          <ProvenanceTag
+            status={
+              mapMode === "RISK_MAP"
+                ? "PREDICTED"
+                : mapMode === "LIVE_NETWORK"
+                ? "OBSERVED"
+                : "SIMULATED"
+            }
+            size="xs"
+          />
         </div>
 
         {/* Map Layer Controls */}

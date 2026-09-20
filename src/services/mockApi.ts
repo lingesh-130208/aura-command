@@ -191,8 +191,8 @@ class MockAuraService {
 
     this.operatorActionHistory.unshift(action);
 
-    // If accepted, update J7 and network state to reflect simulated mitigation
-    if (decision === "ACCEPTED") {
+    // If accepted or modified, update J7 and network state to reflect simulated mitigation
+    if (decision === "ACCEPTED" || decision === "MODIFIED") {
       this.applyMitigationToState(selectedCode);
     } else if (decision === "REJECTED") {
       this.applyFailureToState();
@@ -238,10 +238,12 @@ class MockAuraService {
     });
 
     this.broadcast("STATE_UPDATED", { junctions: this.junctions, segments: this.segments });
+    this.notifyStateChange();
   }
 
   // Helper: simulate mitigation on state
   private applyMitigationToState(interventionCode: string) {
+    this.isMitigated = true;
     this.junctions = this.junctions.map((j) => {
       if (j.id === "J7") {
         return {
@@ -288,6 +290,7 @@ class MockAuraService {
 
   // Helper: simulate unmitigated failure progression
   private applyFailureToState() {
+    this.isMitigated = false;
     this.junctions = this.junctions.map((j) => {
       if (j.id === "J7") {
         return {
@@ -400,6 +403,18 @@ class MockAuraService {
         };
       }
       return j;
+    });
+
+    this.segments = this.segments.map((seg) => {
+      if (seg.segmentId === "SEG-6-7" || seg.segmentId === "SEG-7-8") {
+        return {
+          ...seg,
+          severity: snapshot.severity,
+          queue: snapshot.j7QueueMeters,
+          speed: snapshot.j7SpeedKmh,
+        };
+      }
+      return seg;
     });
 
     this.systemStatus.simulatedTime = snapshot.time;

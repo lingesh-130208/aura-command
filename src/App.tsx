@@ -175,6 +175,7 @@ export default function App() {
                     onSelectSegment={handleSelectSegment}
                     interventionTarget={selectedInterventionCode === "A" ? "J7" : selectedInterventionCode === "B" ? "J5" : "J7"}
                     showEmergencyHighlight={auraState.emergencyCorridor.protectionActive}
+                    mapMode={activeView as "OVERVIEW" | "LIVE_NETWORK" | "RISK_MAP"}
                   />
 
                   {/* Floating Detailed Node / Segment Inspector Card (Section 5) */}
@@ -187,6 +188,11 @@ export default function App() {
                         setSelectedSegmentId(null);
                       }}
                       onTargetIntervention={(junctionId) => {
+                        if (junctionId === "J5") {
+                          setSelectedInterventionCode("B");
+                        } else {
+                          setSelectedInterventionCode("A");
+                        }
                         setActiveView("WHAT_IF_CENTER");
                       }}
                     />

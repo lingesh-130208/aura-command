@@ -271,6 +271,13 @@ export const WhatIfCenter: React.FC<WhatIfCenterProps> = ({
             </button>
           </div>
 
+          {isModifying && (
+            <div className="p-1.5 rounded bg-amber-950/70 border border-amber-500/50 text-[10px] text-amber-200 font-bold flex items-center justify-between">
+              <span>PARAMETERS UNLOCKED FOR OPERATOR OVERRIDE</span>
+              <span className="text-amber-400 font-mono">Adjust sliders below</span>
+            </div>
+          )}
+
           <div className="text-[11px] text-slate-300">
             {currentIntervention?.summary}
           </div>
@@ -563,13 +570,20 @@ export const WhatIfCenter: React.FC<WhatIfCenterProps> = ({
             id="operator-modify-btn"
             disabled={isSubmitting}
             onClick={() => {
-              setIsModifying(true);
-              handleAction("MODIFIED");
+              if (!isModifying) {
+                setIsModifying(true);
+              } else {
+                handleAction("MODIFIED");
+              }
             }}
-            className="py-2.5 px-4 bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-white font-bold rounded flex items-center justify-center gap-2 text-xs transition-colors shadow-lg shadow-amber-950/50"
+            className={`py-2.5 px-4 disabled:opacity-50 text-white font-bold rounded flex items-center justify-center gap-2 text-xs transition-all shadow-lg ${
+              isModifying
+                ? "bg-amber-600 hover:bg-amber-500 border border-amber-300 ring-2 ring-amber-500/40 animate-pulse shadow-amber-950"
+                : "bg-amber-700 hover:bg-amber-600 shadow-amber-950/50"
+            }`}
           >
             <Edit3 className="w-4 h-4" />
-            <span>MODIFY PARAMS</span>
+            <span>{isModifying ? "SUBMIT MODIFIED PLAN" : "MODIFY PARAMS"}</span>
           </button>
 
           <button
