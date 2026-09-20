@@ -1,0 +1,6 @@
+{
+  "name": "AURA COMMAND",
+  "description": "Real-Time AI Decision Intelligence for Preventing Traffic Gridlock - Control-Room Interface",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
